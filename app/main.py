@@ -58,14 +58,24 @@ async def health():
 @app.get("/infra/health")
 async def infra_health():
     status = {
-        "qdrant": qdrant_ok(),
-        "redis": redis_ok(),
-        "postgres": postgres_ok()
+        "qdrant": False ,
+        "redis": False,
+        "postgres": False,
     }
-    if all(status.values()):
-        return {"status": "ok"}
-    else:
-        return {"status": "error", "details": status}  
+    errors = {}
+    for name, fn in [
+        ("qdrant", qdrant_ok),
+        ("redis", redis_ok),
+        ("postgres", postgres_ok),
+    ]:
+        try:
+            status[name] = fn()
+        except Exception as e:
+            errors[name] = str(e)
+    return {
+        "status":status,
+        "errors":errors,
+    }
 
 if __name__ == "__main__":
     import uvicorn
