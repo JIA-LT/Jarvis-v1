@@ -1,5 +1,4 @@
 """应用配置"""
-import os
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -26,7 +25,7 @@ class Settings(BaseSettings):
     QDRANT_PORT: int = 6333
     QDRANT_COLLECTION_NAME: str = "jarvis_vectors"
     
-    # LLM 配置
+    # LLM 配置（从环境变量或 .env 读取，BaseSettings 自动支持）
     OPENAI_API_KEY: Optional[str] = None
     LLM_MODEL: str = "gpt-4o-mini"
     EMBEDDING_MODEL: str = "text-embedding-ada-002"

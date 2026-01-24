@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.core.chunking import chunk_text
-# from app.core.embeddings import get_embeddings
+from app.core.embeddings import get_embeddings, EmbeddingError
 # from app.vector.qdrant import init_collection, add_vector
 import uuid
 
@@ -74,9 +74,17 @@ def ingest_folder(folder_path: str):
         print(f"完成处理: {md_file.name}")
         print(f"{'='*80}\n")
         
-        # 生成嵌入向量
-        # embeddings = get_embeddings(chunks)
-        
+        # 生成嵌入向量（传 content 列表）
+        texts = [c["content"] for c in chunks]
+        try:
+            embeddings = get_embeddings(texts)
+            dim = len(embeddings[0]) if embeddings else 0
+            print(f"嵌入向量: 共 {len(embeddings)} 条, 维度 {dim}")
+        except EmbeddingError as e:
+            print(f"\n⚠️  嵌入向量生成失败:")
+            print(f"   {str(e)}")
+            print(f"\n💡 提示: 可以先测试 chunks 逻辑，embedding 等 API 配额恢复后再试")
+            embeddings = []
         # # 添加到向量数据库
         # for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         #     vector_id = str(uuid.uuid4())
